@@ -41,7 +41,7 @@ def cumSum(arr):
 	known = recursiveResult.map(lambda x: (x[0] * 2 + 1, x[1]))
 	# Fill in missing entries of R'
 	# Let rtn emit (idx + 1, value), arr emit (idx, value) if idx is even
-	rtn = known.flatMap(lambda x: [(x[0] + 1, x[1])] if x[0] + 1 < origSize else []).union(arr.flatMap(lambda x: [x] if x[0] % 2 == 0 else [])).reduceByKey(lambda x, y: x + y).union(known)
+	rtn = known.filter(lambda x: x[0] + 1 < origSize).map(lambda x: (x[0] + 1, x[1])).union(arr.filter(lambda x: x[0] % 2 == 0)).reduceByKey(lambda x, y: x + y).union(known)
 	print('Finished computing cumulative sum for array of size %s' % origSize)
 	return rtn
 res = cumSum(arr).sortByKey().values().collect()
