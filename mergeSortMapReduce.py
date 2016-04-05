@@ -10,15 +10,13 @@ import random
 
 sc = SparkContext()
 f = open('arr.txt', 'w')
-for i in range(1000):
-	f.write(str(random.random()))
-	if i < 1000 - 1:
-		f.write('\n')
-rdd = sc.textFile('arr.txt').zipWithIndex().map(lambda x: (x[1], float(x[0]))).cache()
+N = 100
+data = [random.random() for i in range(N)]
+rdd = sc.parallelize(data).zipWithIndex().map(lambda x: (x[1], float(x[0])))
 
 def mergeSort(rdd):
-	rdd.cache()
 	N = rdd.keys().reduce(max) + 1
+	print('Calling on an array of size %s' % N)
 	if N <= 1:
 		return rdd
 	left = rdd.filter(lambda x: x[0] < N // 2)
