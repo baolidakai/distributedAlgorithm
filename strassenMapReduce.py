@@ -2,6 +2,7 @@
 Implements the Strassen algorithm in parallel
 '''
 from pyspark import SparkContext
+import sys
 sc = SparkContext()
 
 def textToMatrix(rdd): # Convert a matrix in text file to ((i, j), m[i][j])
@@ -105,16 +106,6 @@ def strassenMultiplyGeneral(A, B):
 	# Filter to the correct size
 	return rtn.filter(lambda x: x[0][0] < n1 and x[0][1] < n3)
 
-C = strassenMultiply(A, B)
-# Output C to file
-# Translate into a dictionary
-n1 = C.map(lambda x: x[0][0]).reduce(max) + 1
-n3 = C.map(lambda x: x[0][1]).reduce(max) + 1
-res = {x: y for x, y in C.collect()}
-for i in range(n1):
-	for j in range(n3):
-		sys.stdout.write(res[(i, j)])
-		sys.stdout.write(' ')
-	sys.stdout.write('\n')
+C = strassenMultiplyGeneral(A, B).cache()
 
-sc.stop()
+#sc.stop()
