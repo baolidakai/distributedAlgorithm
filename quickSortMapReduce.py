@@ -45,9 +45,8 @@ def naiveSort(rdd):
 	return rdd.map(lambda x: (x[1], x[0])).sortByKey().map(lambda x: x[0]).zipWithIndex().map(lambda x: (x[1], x[0]))
 
 def quickSort(rdd):
-	size = rdd.map(lambda x: x[0]).reduce(max) + 1
-	print('quickSort(%s)' % size)
-	if size == 1:
+	size = rdd.count()
+	if size <= 1:
 		return rdd
 	# Randomly choose a pivot
 	randomIdx = np.random.randint(size)
@@ -66,6 +65,7 @@ def quickSort(rdd):
 	rightBitmap = rdd.map(lambda x: (x[0], 1 if x[1] > pivot else 0))
 	rightCumsum = cumSum(rightBitmap).sortByKey()
 	rightIdx = rightBitmap.filter(lambda x: x[1] == 1).join(rightCumsum).map(lambda x: (x[0], x[1][1] - 1))
+	R = rightIdx.join(rdd).values()
 	R = quickSort(R)
 	# Merge the results
 	rtn = L.union(sc.parallelize([(leftSize, pivot)])).union(R.map(lambda x: (x[0] + leftSize + 1, x[1])))
